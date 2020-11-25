@@ -261,12 +261,29 @@ WHERE s.decode_type = mode.decode_type
             brotliDecodeSuccessCount = 5726071
         print(f"plainDecodeSuccessCount={plainDecodeSuccessCount}, brotliDecodeSuccessCount={brotliDecodeSuccessCount}")
 
+        sep = 50
         top = min(15, len(plainY))
         plainYPercent = [ x * 100.0 / plainDecodeSuccessCount for x in plainY]
-        plainYPercentTop = plainYPercent[0:top]
-        plainYPercentTop.append(np.sum(plainYPercent[top:]))
-        plainYPercentTopLabel = plainX[0:top]
-        plainYPercentTopLabel.append("others")
+        plainYPercentTop = plainYPercent[0:top - 1]
+        plainYPercentTopLabel = plainX[0:top - 1]
+
+        start = plainX[top - 1]
+        plainRangeCount = 0
+        largeThanSepCount = 0
+        for index in range(len(plainX)):
+            x = plainX[index]
+            if x >= start and x < sep:
+                plainRangeCount += plainY[index]
+            elif x >= sep:
+                largeThanSepCount += plainY[index]
+        
+        plainYPercentTopLabel.append(f"{start}-{sep - 1}")
+        plainYPercentTop.append(plainRangeCount * 100.0 / plainDecodeSuccessCount)
+        
+        if largeThanSepCount > 0:
+            plainYPercentTopLabel.append("others")
+            plainYPercentTop.append(largeThanSepCount * 100.0 / plainDecodeSuccessCount)
+
         fig1, ax1 = plt.subplots()
         ax1.pie(plainYPercentTop, labels=plainYPercentTopLabel, autopct='%1.1f%%', shadow=True, startangle=0)
         ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
@@ -277,7 +294,7 @@ WHERE s.decode_type = mode.decode_type
         # 因为brotli解析分散的比较多，所以先分组，再画图
         cursor.execute(f"""SELECT min(decode_time), max(decode_time), sum(decode_times) FROM output 
             WHERE decode_type = "brotli" 
-            GROUP BY (decode_time / 50)
+            GROUP BY (decode_time / {sep})
             ORDER BY decode_times DESC
             LIMIT {top - 1}"""
         )
