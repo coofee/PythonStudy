@@ -243,7 +243,7 @@ WHERE s.decode_type = mode.decode_type
             WHERE decode_type = "brotli" 
             GROUP BY (decode_time / {sep})
             ORDER BY decode_times DESC
-            LIMIT {top - 1}"""
+            LIMIT {top}"""
         )
 
         brotliGroupBy = []
