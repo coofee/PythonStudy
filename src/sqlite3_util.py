@@ -52,7 +52,7 @@ def generateDatabase(actionLogTextFilePath):
     ])
     print(f"end import data from {actionLogTextFilePath} to {tableName}")
 
-    insertCount = os.system(f"sqlite3 {databaseFile} 'select count(*) from {tableName};' ")
+    os.system(f"sqlite3 {databaseFile} 'select count(*) from {tableName};' ")
     print(f"end generateDatabase from {actionLogTextFilePath}")
     return databaseFile
 
