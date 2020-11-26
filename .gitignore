@@ -1,3 +1,7 @@
 *.png
 *.lock
 *.db
+.vscode
+
+*.pyc
+__pycache__

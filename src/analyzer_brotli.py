@@ -2,69 +2,16 @@
 # -*- coding: UTF-8 -*-
 
 import json
-import os
-from os import curdir, read
 import sys
 import sqlite3
-import datetime
-import subprocess
 
 import numpy as np
 import matplotlib.pyplot as plt
 
+import sqlite3_util
 
 DECODE_SUCCESS = 1
 ROW_COUNT_TEST = 10
-
-def dictFactory(cursor, row):
-    d = {}
-    for index, col in enumerate(cursor.description):
-        d[col[0]] = row[index]
-    return d
-
-def trace(function):
-    def wrapper(*args, **kwargs):
-        startTime = datetime.datetime.now()
-        result = function(*args, **kwargs)
-        endTime = datetime.datetime.now()
-        delta = (endTime - startTime).microseconds / 1000.0
-        print(f"[TRACE] {function.__name__} execute {delta} ms")
-        return result
-    return wrapper
-
-def generateFileName(filename):
-    return f"{datetime.datetime.now()}-{filename}".replace(":", "-").replace(' ', '_')
-
-@trace
-def generateDatabase(actionLogTextFilePath):
-    """
-    return generate databse file from actionLogTextFilePath.
-    """
-
-    print(f"start generateDatabase from {actionLogTextFilePath}")
-    columnNamesString = ""
-    with open(actionLogTextFilePath) as reader:
-        columnNamesString = reader.readline()
-    if len(columnNamesString) < 1:
-        print(f"cannot get column names from {actionLogTextFilePath}")
-    columnNamesString = columnNamesString.strip().replace('\t', ' text, ')
-    sqlCreateActionLogTable = f"create table if not exists actionlog({columnNamesString} text);"
-    databaseFile = generateFileName("actionlog.db")
-
-    tableName = "actionlog"
-    print(f"create table {tableName}")
-    os.system(f"sqlite3 {databaseFile} '{sqlCreateActionLogTable};' ")
-
-    print(f"start import data from {actionLogTextFilePath} to {tableName}")
-    subprocess.call(["sqlite3", f"{databaseFile}",
-        ".mode tabs",
-        f".import {actionLogTextFilePath} {tableName}"
-    ])
-    print(f"end import data from {actionLogTextFilePath} to {tableName}")
-
-    insertCount = os.system(f"sqlite3 {databaseFile} 'select count(*) from {tableName};' ")
-    print(f"end generateDatabase from {actionLogTextFilePath}")
-    return databaseFile
 
 class Analyzer():
 
@@ -95,19 +42,19 @@ WHERE s.decode_type = mode.decode_type
         self.plainDecodeResult = DecodeResult()
         self.brotliDecodeResult = DecodeResult()
 
-    @trace
+    @sqlite3_util.trace
     def analyze(self, actionLogTextFilePath):
-        dbPath = generateDatabase(actionLogTextFilePath)
+        dbPath = sqlite3_util.generateDatabase(actionLogTextFilePath)
         self.__parseDecodeInfoFromDatabase(dbPath)
-        outputPath = generateFileName("output.db")
+        outputPath = sqlite3_util.generateFileName("output.db")
         self.__outputDecodeInfoToDatabase(outputPath)
         self.printStatsInfo(outputPath)
 
-    @trace
+    @sqlite3_util.trace
     def __parseDecodeInfoFromDatabase(self, dbPath):
         print(f"try parse input databse={dbPath}")
         connection = sqlite3.connect(dbPath)
-        connection.row_factory = dictFactory
+        connection.row_factory = sqlite3_util.dictFactory
         cursor = connection.cursor()
         pageType = 'tzcompression'
         actionType = 'statistics'
@@ -126,11 +73,11 @@ WHERE s.decode_type = mode.decode_type
         cursor.close()
         connection.close()
 
-    @trace
+    @sqlite3_util.trace
     def __outputDecodeInfoToDatabase(self, outputPath):
         print(f"try output to database {outputPath}")
         connection = sqlite3.connect(outputPath)
-        connection.row_factory = dictFactory
+        connection.row_factory = sqlite3_util.dictFactory
 
         connection.execute("""create table if not exists summary(
             success_count integer,
@@ -165,7 +112,7 @@ WHERE s.decode_type = mode.decode_type
         connection.close()
         print(f"end output to database {outputPath}")
 
-    @trace
+    @sqlite3_util.trace
     def printStatsInfo(self, dbPath):
         connection = sqlite3.connect(dbPath)
         # connection.row_factory = dictFactory
@@ -248,7 +195,7 @@ WHERE s.decode_type = mode.decode_type
         plt.scatter(np.array(brotliX), np.array(brotliY), s=brotliAreas, c='blue', alpha=0.5)
         plt.scatter(np.array(plainX), np.array(plainY), s=plainAreas, c='red', alpha=0.5)
         plt.title('scatter(plain=red; brotli=blue)')
-        scatterFigure = generateFileName("plain_vs_brotli_scatter.png")
+        scatterFigure = sqlite3_util.generateFileName("plain_vs_brotli_scatter.png")
         plt.savefig(scatterFigure)
 
 
@@ -288,7 +235,7 @@ WHERE s.decode_type = mode.decode_type
         ax1.pie(plainYPercentTop, labels=plainYPercentTopLabel, autopct='%1.1f%%', shadow=True, startangle=0)
         ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
         plt.title(f"plain with top {top}")
-        plainTopPieFigure = generateFileName(f"plain_with_top_{top}_pie.png")
+        plainTopPieFigure = sqlite3_util.generateFileName(f"plain_with_top_{top}_pie.png")
         plt.savefig(plainTopPieFigure)
 
         # 因为brotli解析分散的比较多，所以先分组，再画图
@@ -313,7 +260,7 @@ WHERE s.decode_type = mode.decode_type
         ax1.pie(brotliGroupBy, labels=brotliGroupByLabel, autopct='%1.1f%%', shadow=True, startangle=0)
         ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
         plt.title(f"brotli with top {top}")
-        brotliTopPieFigure = generateFileName(f"brotli_with_top_{top}_pie.png")
+        brotliTopPieFigure = sqlite3_util.generateFileName(f"brotli_with_top_{top}_pie.png")
         plt.savefig(brotliTopPieFigure)
 
 
@@ -379,7 +326,7 @@ def main():
 
     command = sys.argv[1]
     if "import" == command:
-        generateDatabase(sys.argv[2])
+        sqlite3_util.generateDatabase(sys.argv[2])
     elif "analyze" == command:
         Analyzer().analyze(sys.argv[2])
     elif "stats" == command:
