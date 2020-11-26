@@ -2,9 +2,11 @@
 
 使用如下代码测试`brotli`解压缩，测试文件详见：
 
-[brotli_file](image/5f16b5c7df82571d75a9c1539a0912c06a3db890.br)
+|| file | size|
+|:--:|:--|:--:|
+| brotli | [brotli_file](image/5f16b5c7df82571d75a9c1539a0912c06a3db890.br) | 6.7KB | 
+| plain | [plain_file](image/5f16b5c7df82571d75a9c1539a0912c06a3db890.txt) | 39KB |
 
-[plain_file](image/5f16b5c7df82571d75a9c1539a0912c06a3db890.txt)
 
 ```kotlin
 private class CopyStatistics(
