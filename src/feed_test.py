@@ -5,7 +5,7 @@ import sys
 import requests
 
 
-def get(url, headers):
+def feed_api(url, headers):
     originResp = requests.get(url=url, headers=headers)
     originText = originResp.text
     originResp.close()
@@ -66,7 +66,7 @@ def read(configFilePath):
 if __name__ == "__main__":
     argvLen = len(sys.argv)
     if (argvLen < 2):
-        print(f"usage: python api.py [path/to/api/config/file]")
+        print(f"usage: python src/feed_test.py [path/to/api/config/file]")
     configFile = sys.argv[1]
     apiConfig = read(configFile)    
     get(apiConfig.url, apiConfig.headers)
