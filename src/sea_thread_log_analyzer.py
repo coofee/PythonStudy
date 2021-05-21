@@ -33,6 +33,7 @@ TAG_THREAD_END = 'jvmti_sea: ThreadEnd'
 TAG_NAME = ', name='
 TAG_NAME_LEN = len(TAG_NAME)
 
+# thread_modules.json like this
 THREAD_MODULES = {
     'unknown': {
         'name': '未知',
