@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 # python3 frida_shadow_test.py
+# frida -U Gadget -l frida_hook.js
 
 import frida
 
