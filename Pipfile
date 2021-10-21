@@ -9,6 +9,7 @@ verify_ssl = true
 [packages]
 matplotlib = "==3.3.3"
 requests = "==2.25.0"
+frida = "==15.1.6"
 
 [requires]
-python_version = "3.7"
+python_version = "3.9"
