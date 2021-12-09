@@ -13,6 +13,10 @@ def read_js_code(js_file):
 def on_message(message, data):
     print(f"message={message}, data={data}")
 
+def on_detached():
+    print('detached.')
+    exit(0)
+
 def hook(code):
     print(f"code={code}")
     deviceManager = frida.get_device_manager()
@@ -24,9 +28,10 @@ def hook(code):
     # print(f"pid={pid}")
     # session = device.attach(pid)
     session = device.attach('Gadget')
-    script = session.create_script(code)
-    script.on("message", on_message)
-    script.load()
+    session.on('detached', on_detached)
+    # script = session.create_script(code)
+    # script.on("message", on_message)
+    # script.load()
     # device.resume(pid)
     # session.detach()
     input()
