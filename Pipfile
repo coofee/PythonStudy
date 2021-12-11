@@ -10,6 +10,9 @@ verify_ssl = true
 matplotlib = "==3.3.3"
 requests = "==2.25.0"
 frida = "==15.1.6"
+pillow = ">= 7.0.0"
+imgcompare = ">=2.0.0"
+opencv-python = ">=4.5.4.60"
 
 [requires]
 python_version = "3.9"

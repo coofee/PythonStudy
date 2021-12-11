@@ -1,3 +1,9 @@
+# pipenv安装
+
+```shell
+$ brew install pipenv
+```
+
 # pipenv使用
 
 ```shell

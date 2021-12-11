@@ -2,6 +2,7 @@
 *.lock
 *.db
 .vscode
+output
 
 *.pyc
 __pycache__
