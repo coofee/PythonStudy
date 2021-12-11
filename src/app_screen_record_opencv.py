@@ -35,8 +35,7 @@ def convertVideoToImageFrame(video, imageDir):
 def mkdirs(dir):
     if os.path.exists(dir):
         shutil.rmtree(dir, ignore_errors=True)
-    else:
-        os.makedirs(dir)
+    os.makedirs(dir)
 
 def launchAndRecordAppStartUp(launchAppCommand, stopAppCommand, maxCount, prefix):
     outputDir = os.path.join(os.path.curdir, 'output')
